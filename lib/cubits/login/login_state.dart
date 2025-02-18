@@ -8,9 +8,7 @@ class LoginState extends Equatable {
   final String password;
   final bool showPassword;
   final LoginStatus status;
-  final Failure failure;
-  
-  // New field to control error display.
+  final Failure failure;  
   final bool showValidation;
 
   bool get isFormValid => email.isNotEmpty && password.isNotEmpty;
