@@ -233,6 +233,7 @@ class LoginScreen extends StatelessWidget {
         decoration: InputDecoration(
           labelText: 'email'.tr(),
           helperText: '',
+          errorText: state.showValidation && !state.isEmailValid ? 'invalidEmail'.tr() : null,
         ),
       ),
       sizedBox16,
@@ -244,6 +245,7 @@ class LoginScreen extends StatelessWidget {
         decoration: InputDecoration(
           labelText: 'password'.tr(),
           helperText: '',
+          errorText: state.showValidation && !state.isPasswordValid ? 'invalidPassword'.tr() : null,
         ),
       ),
       _buildTogglePasswordButton(context, state),
