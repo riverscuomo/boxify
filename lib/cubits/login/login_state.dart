@@ -9,8 +9,13 @@ class LoginState extends Equatable {
   final bool showPassword;
   final LoginStatus status;
   final Failure failure;
+  
+  // New field to control error display.
+  final bool showValidation;
 
   bool get isFormValid => email.isNotEmpty && password.isNotEmpty;
+  bool get isEmailValid => email.contains('@');
+  bool get isPasswordValid => password.length >= 6;
 
   const LoginState({
     required this.email,
@@ -18,6 +23,7 @@ class LoginState extends Equatable {
     required this.showPassword,
     required this.status,
     required this.failure,
+    required this.showValidation,
   });
 
   factory LoginState.initial() {
@@ -27,6 +33,7 @@ class LoginState extends Equatable {
       showPassword: true,
       status: LoginStatus.initial,
       failure: Failure(),
+      showValidation: false,
     );
   }
 
@@ -34,7 +41,7 @@ class LoginState extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [email, password, showPassword, status, failure];
+  List<Object> get props => [email, password, showPassword, status, failure, showValidation];
 
   LoginState copyWith({
     String? email,
@@ -42,6 +49,7 @@ class LoginState extends Equatable {
     bool? showPassword,
     LoginStatus? status,
     Failure? failure,
+    bool? showValidation,
   }) {
     return LoginState(
       email: email ?? this.email,
@@ -49,6 +57,7 @@ class LoginState extends Equatable {
       showPassword: showPassword ?? this.showPassword,
       status: status ?? this.status,
       failure: failure ?? this.failure,
+      showValidation: showValidation ?? this.showValidation,
     );
   }
 }

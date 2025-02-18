@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:boxify/services/google_sign_in_plugin.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({
@@ -224,21 +225,28 @@ class LoginScreen extends StatelessWidget {
       ),
       sizedBox16,
       TextFormField(
-        decoration: const InputDecoration(hintText: 'Email'),
-        onChanged: (value) =>
-            context.read<LoginCubit>().emailChanged(value.trim()),
-        validator: (value) {
-          final trimmedValue = value?.trim() ?? '';
-          return !trimmedValue.contains('@') ? 'emailError'.translate() : null;
-        },
+        key: const Key('loginForm_emailInput_textField'),
+        onChanged: (email) => context.read<LoginCubit>().emailChanged(email),
+        keyboardType: TextInputType.emailAddress,
+        autocorrect: false,
+        autofillHints: const [AutofillHints.email, AutofillHints.username],
+        decoration: InputDecoration(
+          labelText: 'email'.tr(),
+          helperText: '',
+          errorText: state.showValidation && !state.isEmailValid ? 'invalidEmail'.tr() : null,
+        ),
       ),
       sizedBox16,
       TextFormField(
-        decoration: const InputDecoration(hintText: 'Password'),
-        obscureText: state.showPassword,
-        onChanged: (value) => context.read<LoginCubit>().passwordChanged(value),
-        validator: (value) =>
-            value!.length < 6 ? 'passwordError'.translate() : null,
+        key: const Key('loginForm_passwordInput_textField'),
+        onChanged: (password) => context.read<LoginCubit>().passwordChanged(password),
+        obscureText: !state.showPassword,
+        autofillHints: const [AutofillHints.password],
+        decoration: InputDecoration(
+          labelText: 'password'.tr(),
+          helperText: '',
+          errorText: state.showValidation && !state.isPasswordValid ? 'invalidPassword'.tr() : null,
+        ),
       ),
       _buildTogglePasswordButton(context, state),
       sizedBox28,
@@ -386,7 +394,13 @@ class LoginScreen extends StatelessWidget {
   void _submitForm(BuildContext context) {
     final loginCubit = context.read<LoginCubit>();
     if (loginCubit.state.status != LoginStatus.submitting) {
-      context.read<LoginCubit>().logInWithCredentials();
+      // Set showValidation to true when submitting
+      loginCubit.emit(loginCubit.state.copyWith(showValidation: true));
+      
+      // Only proceed with login if validation passes
+      if (loginCubit.state.isEmailValid && loginCubit.state.isPasswordValid) {
+        loginCubit.logInWithCredentials();
+      }
     }
   }
 

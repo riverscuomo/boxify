@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:boxify/cubits/signup/signup_cubit.dart';
 
 class SignupScreen extends StatelessWidget {
   SignupScreen({super.key});
@@ -103,26 +104,28 @@ class SignupScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
-                                decoration:
-                                    const InputDecoration(hintText: 'Email'),
-                                onChanged: (value) => context
-                                    .read<SignupCubit>()
-                                    .emailChanged(value),
-                                validator: (value) => !value!.contains('@')
-                                    ? 'Please enter a valid email.'
-                                    : null,
+                                key: const Key('signUpForm_emailInput_textField'),
+                                onChanged: (email) => context.read<SignupCubit>().emailChanged(email),
+                                keyboardType: TextInputType.emailAddress,
+                                autocorrect: false,
+                                autofillHints: const [AutofillHints.email, AutofillHints.newUsername],
+                                decoration: InputDecoration(
+                                  labelText: 'email'.tr(),
+                                  helperText: '',
+                                  errorText: state.showValidation && !state.isEmailValid ? 'invalidEmail'.tr() : null,
+                                ),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
-                                decoration:
-                                    const InputDecoration(hintText: 'Password'),
+                                key: const Key('signUpForm_passwordInput_textField'),
+                                onChanged: (password) => context.read<SignupCubit>().passwordChanged(password),
                                 obscureText: true,
-                                onChanged: (value) => context
-                                    .read<SignupCubit>()
-                                    .passwordChanged(value),
-                                validator: (value) => value!.length < 6
-                                    ? 'Must be at least 6 characters.'
-                                    : null,
+                                autofillHints: const [AutofillHints.newPassword],
+                                decoration: InputDecoration(
+                                  labelText: 'password'.tr(),
+                                  helperText: '',
+                                  errorText: state.showValidation && !state.isPasswordValid ? 'invalidPassword'.tr() : null,
+                                ),
                               ),
                               const SizedBox(height: 28),
                               ElevatedButton(
@@ -171,13 +174,17 @@ class SignupScreen extends StatelessWidget {
   }
 
   void _submitForm(BuildContext context, bool isSubmitting) {
-    if (_formKey.currentState!.validate() && !isSubmitting) {
-      logger.i(
-        'submit sign up form context.read<SignupCubit>().signUpWithCredentials()',
+    if (!isSubmitting) {
+      // Set showValidation to true when submitting
+      context.read<SignupCubit>().emit(
+        context.read<SignupCubit>().state.copyWith(showValidation: true)
       );
-      context.read<SignupCubit>().signUpWithCredentials();
-    } else {
-      logger.i('failed signUpWithCredentials ');
+      
+      // Only proceed if validation passes
+      if (context.read<SignupCubit>().state.isEmailValid && 
+          context.read<SignupCubit>().state.isPasswordValid) {
+        context.read<SignupCubit>().signUpWithCredentials();
+      }
     }
   }
 }
