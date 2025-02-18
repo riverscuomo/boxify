@@ -8,10 +8,14 @@ class LoginState extends Equatable {
   final String password;
   final bool showPassword;
   final LoginStatus status;
-  final Failure failure;  
+  final Failure failure;
+  
+  // New field to control error display.
   final bool showValidation;
 
   bool get isFormValid => email.isNotEmpty && password.isNotEmpty;
+  bool get isEmailValid => email.contains('@');
+  bool get isPasswordValid => password.length >= 6;
 
   const LoginState({
     required this.email,

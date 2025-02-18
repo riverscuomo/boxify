@@ -394,7 +394,13 @@ class LoginScreen extends StatelessWidget {
   void _submitForm(BuildContext context) {
     final loginCubit = context.read<LoginCubit>();
     if (loginCubit.state.status != LoginStatus.submitting) {
-      loginCubit.logInWithCredentials();
+      // Set showValidation to true when submitting
+      loginCubit.emit(loginCubit.state.copyWith(showValidation: true));
+      
+      // Only proceed with login if validation passes
+      if (loginCubit.state.isEmailValid && loginCubit.state.isPasswordValid) {
+        loginCubit.logInWithCredentials();
+      }
     }
   }
 
