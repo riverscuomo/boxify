@@ -112,6 +112,7 @@ class SignupScreen extends StatelessWidget {
                                 decoration: InputDecoration(
                                   labelText: 'email'.tr(),
                                   helperText: '',
+                                  errorText: state.showValidation && !state.isEmailValid ? 'invalidEmail'.tr() : null,
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -123,6 +124,7 @@ class SignupScreen extends StatelessWidget {
                                 decoration: InputDecoration(
                                   labelText: 'password'.tr(),
                                   helperText: '',
+                                  errorText: state.showValidation && !state.isPasswordValid ? 'invalidPassword'.tr() : null,
                                 ),
                               ),
                               const SizedBox(height: 28),
@@ -173,7 +175,16 @@ class SignupScreen extends StatelessWidget {
 
   void _submitForm(BuildContext context, bool isSubmitting) {
     if (!isSubmitting) {
-      context.read<SignupCubit>().signUpWithCredentials();
+      // Set showValidation to true when submitting
+      context.read<SignupCubit>().emit(
+        context.read<SignupCubit>().state.copyWith(showValidation: true)
+      );
+      
+      // Only proceed if validation passes
+      if (context.read<SignupCubit>().state.isEmailValid && 
+          context.read<SignupCubit>().state.isPasswordValid) {
+        context.read<SignupCubit>().signUpWithCredentials();
+      }
     }
   }
 }
