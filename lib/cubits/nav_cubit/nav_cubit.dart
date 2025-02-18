@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:boxify/app_core.dart';
 
 class NavCubit extends Cubit<int> {
-  NavCubit(int initialIndex)
-      : super(initialIndex); // Initial index as parameter
+  //NavCubit(int initialIndex) 
+  //  : super(initialIndex); // Initial index if want to set advanced and basic differently 
+  
+  NavCubit() : super(0); // Initial index set to 0 (home) for all app types
 
   void updateIndex(int newIndex) {
     emit(newIndex); // This updates the current state of the navigation index

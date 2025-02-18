@@ -97,12 +97,12 @@ class MyApp extends StatelessWidget {
         ),
       ),
       BlocProvider<NavCubit>(
-        // create: (context) => NavCubit(),
-        create: (_) => NavCubit(
-          Core.app.type == AppType.advanced
-              ? bottomNavigationBarItemAdvanced(context).length - 1
-              : bottomNavigationBarItemBasic(context).length - 1,
-        ),
+        //create: (_) => NavCubit( 
+          //Core.app.type == AppType.advanced
+              //? bottomNavigationBarItemAdvanced(context).length - 1
+              //: bottomNavigationBarItemBasic(context).length - 1,
+        //),
+        create: (context) => NavCubit(), // applies to all app types
         child: MyApp(), // Your main app widget
       ),
       BlocProvider<PlaylistTracksBloc>(
