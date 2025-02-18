@@ -8,13 +8,11 @@ class SignupState extends Equatable {
   final bool usernameIsValid;
   final SignupStatus status;
   final Failure failure;
-  
-  // New field:
   final bool showValidation;
 
   bool get isFormValid => email.isNotEmpty && password.isNotEmpty;
   bool get isEmailValid => email.contains('@');
-  bool get isPasswordValid => password.length >= 6;
+  bool get isPasswordValid => password.length >= 1;
 
   const SignupState({
     required this.email,

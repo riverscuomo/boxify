@@ -175,12 +175,10 @@ class SignupScreen extends StatelessWidget {
 
   void _submitForm(BuildContext context, bool isSubmitting) {
     if (!isSubmitting) {
-      // Set showValidation to true when submitting
       context.read<SignupCubit>().emit(
         context.read<SignupCubit>().state.copyWith(showValidation: true)
       );
       
-      // Only proceed if validation passes
       if (context.read<SignupCubit>().state.isEmailValid && 
           context.read<SignupCubit>().state.isPasswordValid) {
         context.read<SignupCubit>().signUpWithCredentials();

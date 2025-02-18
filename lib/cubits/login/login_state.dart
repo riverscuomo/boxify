@@ -13,7 +13,7 @@ class LoginState extends Equatable {
 
   bool get isFormValid => email.isNotEmpty && password.isNotEmpty;
   bool get isEmailValid => email.contains('@');
-  bool get isPasswordValid => password.length >= 6;
+  bool get isPasswordValid => password.length >= 1;
 
   const LoginState({
     required this.email,
