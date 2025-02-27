@@ -109,3 +109,14 @@ class InitialDownloadState extends DownloadEvent {
   @override
   List<Object?> get props => [playlistId];
 }
+
+class RemoveAllDownloads extends DownloadEvent {
+  final String userId;
+
+  const RemoveAllDownloads({
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [userId];
+}

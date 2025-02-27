@@ -1,6 +1,7 @@
 import 'package:boxify/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:boxify/screens/settings/buttons/remove_all_downloads_tile.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -111,6 +112,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ),
                 if (isLoggedIn || Core.app.type == AppType.basic)
                   ClearCacheText(context: context, id: user.id),
+                if (isLoggedIn || Core.app.type == AppType.basic)
+                  RemoveAllDownloadsTile(context: context, id: user.id),
                 if (isLoggedIn && Core.app.type == AppType.advanced)
                   DeleteAccountTile(
                       context: context, id: user.id, style: Core.appStyle.bold),
@@ -131,13 +134,11 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 }
 
-
-
-              // // DISCORD PROFILE BUTTON
-              // if (isLoggedIn)
-              //   Padding(
-              //     padding: const EdgeInsets.all(0),
-              //     child: DiscordProfileButton(
-              //       discordId: user.discordId,
-              //     ),
-              //   ),
+// // DISCORD PROFILE BUTTON
+// if (isLoggedIn)
+//   Padding(
+//     padding: const EdgeInsets.all(0),
+//     child: DiscordProfileButton(
+//       discordId: user.discordId,
+//     ),
+//   ),

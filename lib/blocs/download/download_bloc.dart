@@ -19,6 +19,7 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     on<SyncDownloadsWithAllTracks>(_onSyncDownloadsWithAllTracks);
     on<RemoveDownloadedTracks>(_onRemoveDownloadedTracks);
     on<RemoveDownloadsNotInAllTracks>(_onRemoveDownloadsNotInAllTracks);
+    on<RemoveAllDownloads>(_onRemoveAllDownloads);
     on<UpdateDownloadProgress>(_onUpdateDownloadProgress);
     on<StopDownload>(_onStopAllDownloadsForPlaylist);
     on<DownloadError>(_onDownloadError);
@@ -545,5 +546,83 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
             errorMessage: event.errorMessage,
           ),
     );
+  }
+
+  Future<void> _onRemoveAllDownloads(
+    RemoveAllDownloads event,
+    Emitter<DownloadState> emit,
+  ) async {
+    logger.i('DownloadBloc: Removing all downloads');
+    
+    if (kIsWeb) {
+      // Deletion of downloaded files is not applicable in a web environment.
+      logger.i('DownloadBloc: Cannot remove downloads in a web environment.');
+      return;
+    }
+
+    emit(state.copyWith(status: DownloadStatus.removing));
+
+    // Find the path to local storage where the downloads are stored.
+    final localPath = await findLocalPath(event.userId);
+    
+    // Cancel any on-going download tokens if they exist.
+    for (var token in downloadTokens) {
+      token.cancel("Cancellation requested by user.");
+    }
+    downloadTokens.clear();
+    
+    bool allDeleted = true;
+    
+    try {
+      final directory = Directory(localPath);
+      if (await directory.exists()) {
+        // Get all mp3 files in the directory
+        final files = directory.listSync()
+            .where((file) => file.path.endsWith('.mp3'))
+            .toList();
+        
+        logger.i('Found ${files.length} downloaded files to delete');
+        
+        // Delete each file
+        for (var file in files) {
+          try {
+            if (file is File && await file.exists()) {
+              await file.delete();
+              logger.i('Deleted file: ${file.path}');
+            }
+          } catch (e) {
+            logger.e('Error deleting file ${file.path}: $e');
+            allDeleted = false;
+          }
+        }
+      } else {
+        logger.i('Download directory does not exist: $localPath');
+      }
+      
+      // Get the filenames as UUIDs
+      final downloadedTracks = Map<String, Track>.from(state.downloadedTracks);
+      // Create an empty map for download progress
+      final downloadProgress = Map<String, double>.from({});
+      
+      if (allDeleted) {
+        emit(state.copyWith(
+          status: DownloadStatus.completed,
+          downloadedTracks: {}, // Clear the downloaded tracks
+          downloadProgress: downloadProgress,
+          downloadedCount: 0,
+        ));
+      } else {
+        emit(state.copyWith(
+          status: DownloadStatus.error,
+          errorMessage: 'Failed to delete one or more downloaded tracks',
+        ));
+      }
+    } catch (e) {
+      logger.e('Error removing all downloads: $e');
+      emit(state.copyWith(
+        status: DownloadStatus.error,
+        errorMessage: 'Error removing all downloads: $e',
+      ));
+    }
   }
 }
