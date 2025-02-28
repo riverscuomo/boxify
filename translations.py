@@ -1,8 +1,7 @@
-
 import json
 import openai
 import os
-
+from pathlib import Path
 
 def fetch_openai_completion(text: str, lang: str):
     model = "gpt-3.5-turbo"
@@ -28,63 +27,49 @@ def fetch_openai_completion(text: str, lang: str):
         print(text)
         return text
 
-    except openai.error.OpenAIError as e:
+    except Exception as e:
         text = f"An error occurred: {e}"
         print(text)
-
-
-def process_languages2(supported_languages):
-
-    openai.api_key = os.getenv('OPENAI_API_KEY')
-
-    # Read the contents of the 'en' file as a JSON dictionary
-    with open('boxify/assets/translations/en.json', 'r', encoding='utf-8') as f:
-        en_dict = json.load(f)
-
-    # Process each supported language
-    for lang in supported_languages:
-        print('Creating or updating file for language:', lang)
-
-        # Load the current language's file if it exists, otherwise use an empty dictionary
-        lang_file_path = f'boxify/assets/translations/{lang}.json'
-        if os.path.exists(lang_file_path):
-            with open(lang_file_path, 'r', encoding='utf-8') as f:
-                lang_dict = json.load(f)
-        else:
-            lang_dict = {}
-
-        # Determine which keys need to be translated
-        keys_to_translate = [
-            key for key in en_dict if key not in lang_dict or not lang_dict[key]]
-
-        # Fetch translations for missing keys
-        for key in keys_to_translate:
-            print(f'Looking up translation for key: {key}', end='... ')
-            lang_dict[key] = fetch_openai_completion(en_dict[key], lang)
-            print('Done')
-
-        # Save the updated dictionary back to the file
-        with open(lang_file_path, 'w', encoding='utf-8') as f:
-            json.dump(lang_dict, f, ensure_ascii=False, indent=4)
-
+        return ""
 
 def process_languages(supported_languages):
     openai.api_key = os.getenv('OPENAI_API_KEY')
-
+    
+    # Get the base directory (where your script is)
+    base_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+    
+    # Create the translations directory if it doesn't exist
+    translations_dir = base_dir / "assets" / "translations"
+    translations_dir.mkdir(parents=True, exist_ok=True)
+    
+    en_file_path = translations_dir / "en.json"
+    
+    # Check if en.json exists, if not create a sample one
+    if not en_file_path.exists():
+        print(f"Warning: {en_file_path} not found. Creating a sample file.")
+        sample_en = {
+            "home": "Home",
+            "search": "Search",
+            "library": "Library",
+            "settings": "Settings"
+        }
+        with open(en_file_path, 'w', encoding='utf-8') as f:
+            json.dump(sample_en, f, ensure_ascii=False, indent=4)
+    
     # Open and read the contents of the 'en' file
-    with open('boxify/assets/translations/en.json', 'r', encoding='utf-8') as f:
+    with open(en_file_path, 'r', encoding='utf-8') as f:
         # Use json.load to read the JSON contents
         en_dict = json.load(f)
 
         for lang in supported_languages:
             print('Creating or updating file for language:', lang)
-            lang_file_path = f'boxify/assets/translations/{lang}.json'
+            lang_file_path = translations_dir / f"{lang}.json"
 
             # Initialize an empty language dictionary
             lang_dict = {}
 
             # Check if language file exists and load it
-            if os.path.exists(lang_file_path):
+            if lang_file_path.exists():
                 try:
                     with open(lang_file_path, 'r', encoding='utf-8') as f:
                         # Use json.load to read the JSON contents
@@ -108,15 +93,19 @@ def process_languages(supported_languages):
                 # Use json.dump to write the JSON contents
                 json.dump(lang_dict, f, ensure_ascii=False, indent=4)
 
-
 def main():
+    # Check for OpenAI API key
+    if not os.getenv('OPENAI_API_KEY'):
+        print("ERROR: OPENAI_API_KEY environment variable not set.")
+        print("Please set it by running: set OPENAI_API_KEY=your_api_key (on Windows)")
+        print("Or export OPENAI_API_KEY=your_api_key (on macOS/Linux)")
+        return
 
     supported_languages = ['es', 'fr', 'de', 'it', 'pt',  'zh', 'ja', 'ko', 'ar',
                            # filipino
                            'tl',
                            # indonesia
                            'id', 'cs', 'nl', 'pl', 'nn',
-
                            'sv']
 
     # let's start with just spanish and japanese
@@ -124,9 +113,6 @@ def main():
 
     # first let's get the contents of the 'en' file
     process_languages(supported_languages)
-
-    # fetch_openai_completion('Home', 'de')
-
 
 if __name__ == '__main__':
     main()
