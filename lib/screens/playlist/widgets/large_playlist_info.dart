@@ -99,6 +99,12 @@ class _LargePlaylistInfoState extends State<LargePlaylistInfo>
                       controller: titleController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.white, // couldn't use Core in const
+                            width: 2.0
+                          ),
+                        ),
                         // hintText: state.viewedPlaylist!.name,
                       ),
                     ),
@@ -112,6 +118,12 @@ class _LargePlaylistInfoState extends State<LargePlaylistInfo>
                       controller: descriptionController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.white, // couldn't use core in const
+                            width: 2.0
+                          ),
+                        ),
                         hintText: 'Add an optional description',
                       ),
                     ),
@@ -303,3 +315,4 @@ class _LargePlaylistInfoState extends State<LargePlaylistInfo>
     );
   }
 }
+

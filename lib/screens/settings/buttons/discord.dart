@@ -48,6 +48,12 @@ class DiscordFormField extends StatelessWidget {
         decoration: InputDecoration(
           hintMaxLines: 3,
           border: const OutlineInputBorder(),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Core.appColor.focusBorder,
+              width: 2.0
+            ),
+          ),
           hintText: user.discordId.isNotEmpty
               ? user.discordId
               : 'discordHintText'.translate(),

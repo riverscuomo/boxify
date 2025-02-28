@@ -28,12 +28,38 @@ class BoxifyTheme {
           foregroundColor: Core.appColor.text,
         ),
       ),
-      iconTheme: IconThemeData(color: Core.appColor.text),
+      iconTheme: IconThemeData(
+        color: Core.appColor.icon,
+      ),
       appBarTheme: AppBarTheme(
-        iconTheme: IconThemeData(color: Core.appColor.text),
+        iconTheme: IconThemeData(
+          color: Core.appColor.icon
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
         actionTextColor: Core.appColor.text,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: Core.appColor.icon,
+        selectionColor: Core.appColor.text.withOpacity(0.5),
+        selectionHandleColor: Core.appColor.icon,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: Core.appColor.primary
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: Core.appColor.focusBorder, 
+            width: 2.0
+          ),
+        ),
+        labelStyle: TextStyle(
+          color: Core.appColor.hintText
+        ), 
+        hintStyle: TextStyle(
+          color: Core.appColor.hintText
+        ),
       ),
     );
   }

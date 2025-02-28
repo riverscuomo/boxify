@@ -413,6 +413,9 @@ class BaseColor {
   get header => Colors.black;
   Color get text => Colors.white;
   Color get navBar => Colors.white;
+  Color get icon => Colors.white;
+  Color get hintText => const Color(0XFFCCCCCC); // lightGrey
+  Color get focusBorder => Colors.white;
   Color get iconButton => const Color(0xFF999999);
   Color get barrier => Colors.black38;
   Color get separator => const Color(0xFFeeeeee);
