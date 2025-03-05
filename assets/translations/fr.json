@@ -148,5 +148,13 @@
     "confirmDelete": "Supprimer",
     "connectToDiscord": "Se connecter à Discord.",
     "logout": "Déconnexion",
-    "userId": "Identifiant de l'utilisateur"
+    "userId": "Identifiant de l'utilisateur",
+    "mustLogInDialogTitle": "Prêt à {actionName}?",
+    "mustLogInDialogMessage": "Créez un compte ou connectez-vous pour noter des morceaux, créer des playlists et plus encore.",
+    "actionRateTracks": "noter des morceaux",
+    "actionCreatePlaylists": "créer des playlists",
+    "actionEditLibrary": "gérer votre bibliothèque",
+    "actionBuyBundles": "acheter des packs",
+    "logInOrSignUp": "SE CONNECTER OU S'INSCRIRE",
+    "notNow": "PAS MAINTENANT"
 }

@@ -132,6 +132,7 @@ class _BundleCardForMarketScreenState extends State<BundleCardForMarketScreen> {
   _openBundlePreview(Bundle bundle) {
     _play(bundle.preview!);
     final songList = bundle.songList?.split(',');
+    final userState = context.read<UserBloc>().state;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
@@ -200,14 +201,8 @@ class _BundleCardForMarketScreenState extends State<BundleCardForMarketScreen> {
               onPressed: () async {
                 info('openBundlePreview:buy');
                 audioPlayer.stop();
-
-                final user = context.read<UserBloc>().state.user;
-
-                if (user.isAnonymous) {
-                  GoRouter.of(context).go('/login');
-                  // context.read<AuthBloc>().add(AuthLogoutRequested());
-                  showMySnack(context, message: 'loginToBuy'.translate());
-                } else {
+                if (UserHelper.isLoggedInOrReroute(userState, context,
+                    'actionBuyBundles'.translate(), Icons.music_note_rounded)) {
                   await buy(context)
                       .then((value) => GoRouter.of(context).pop());
                 }
@@ -274,11 +269,12 @@ class _BundleCardForMarketScreenState extends State<BundleCardForMarketScreen> {
                     backgroundColor: Colors.blue,
                   ),
                   onPressed: () async {
-                    final user = context.read<UserBloc>().state.user;
-                    if (user.isAnonymous) {
-                      GoRouter.of(context).go('/login');
-                      showMySnack(context, message: 'loginToBuy'.translate());
-                    } else {
+                    final userState = context.read<UserBloc>().state;
+                    if (UserHelper.isLoggedInOrReroute(
+                        userState,
+                        context,
+                        'actionBuyBundles'.translate(),
+                        Icons.music_note_rounded)) {
                       await buy(context);
                     }
                   },

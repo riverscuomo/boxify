@@ -144,5 +144,13 @@
     "youCanFree": "You can free up storage by clearing your cache. Your downloads won't be removed.",
     "yourDownloadsWontBeRemoved": "Your downloads won't be removed.",
     "youHaventRatedYet": "You Haven't Rated These Songs Yet",
-    "yourPlaylists": "Your playlists"
+    "yourPlaylists": "Your playlists",
+    "mustLogInDialogTitle": "Ready to {actionName}?",
+    "mustLogInDialogMessage": "Create an account or log in to rate tracks, create playlists, and more.",
+    "actionRateTracks": "rate tracks",
+    "actionCreatePlaylists": "create playlists",
+    "actionEditLibrary": "manage your library",
+    "actionBuyBundles": "buy bundles",
+    "logInOrSignUp": "LOG IN OR SIGN UP",
+    "notNow": "NOT NOW"
 }

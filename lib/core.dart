@@ -110,7 +110,6 @@ class Core {
     GoRouter.optionURLReflectsImperativeAPIs = true;
     print('initializing core');
     if (kIsWeb) {
-
       if (firebaseOptions == null) {
         throw Exception('Firebase options must be provided for web apps');
       }
@@ -359,7 +358,8 @@ extension StringLocalization on String {
   /// Note: this method depends on the language .json file having an English translation
   /// for all the keys without a translation in the current language. If a key is missing
   /// the method will return the key itself, which is not ideal.
-  String localized() => this.tr();
+  String localized({Map<String, String>? namedArgs}) =>
+      this.tr(namedArgs: namedArgs);
 
   /// Returns the translated version of the string if it exists; otherwise,
   /// returns null.
@@ -380,7 +380,13 @@ extension StringLocalization on String {
   /// [fallback] (optional, default: true): If set to true, the method returns
   /// the translated version using the EasyLocalization package if the translation
   /// is not found in LocalizationManager.
-  String translate({bool fallback = true}) => localized();
+  ///
+  /// [namedArgs] (optional): A map of named arguments to be used in the translation.
+  /// Arguments can be used in the translation string by enclosing them in curly braces.
+  /// Example: 'Hello {name}'.translate(namedArgs: {'name': 'Thomas'}) will return 'Hello Thomas'.
+  String translate({bool fallback = true, Map<String, String>? namedArgs}) =>
+      localized(namedArgs: namedArgs);
+
   // // Try translating the string using LocalizationManager
   // LocalizationManager.translate(this)
   // // If translation is not found in LocalizationManager and fallback is true,
