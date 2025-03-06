@@ -20,6 +20,8 @@ class MyPlayerState extends Equatable {
   // We use HSLColor so operations to adjust lightness are more efficient (avoids unecessary conversions)
   final HSLColor backgroundColor;
   List<Track> queue;
+  final Duration? savedPosition;
+  final Track? savedTrack;
 
   MyPlayerState({
     required this.status,
@@ -27,6 +29,8 @@ class MyPlayerState extends Equatable {
     required this.player,
     required this.backgroundColor,
     required this.queue,
+    this.savedPosition,
+    this.savedTrack,
   });
 
   factory MyPlayerState.initial(
@@ -38,6 +42,8 @@ class MyPlayerState extends Equatable {
       player: player,
       backgroundColor: HSLColor.fromColor(Core.appColor.primary),
       queue: [],
+      savedPosition: null,
+      savedTrack: null,
     );
   }
 
@@ -48,6 +54,8 @@ class MyPlayerState extends Equatable {
         player,
         backgroundColor,
         queue,
+        savedPosition,
+        savedTrack,
       ];
 
   MyPlayerState copyWith({
@@ -57,6 +65,8 @@ class MyPlayerState extends Equatable {
     ConcatenatingAudioSource? audioSource,
     HSLColor? backgroundColor,
     List<Track>? queue,
+    Duration? savedPosition,
+    Track? savedTrack,
   }) {
     return MyPlayerState(
       status: status ?? this.status,
@@ -64,6 +74,8 @@ class MyPlayerState extends Equatable {
       player: player ?? this.player,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       queue: queue ?? this.queue,
+      savedPosition: savedPosition ?? this.savedPosition,
+      savedTrack: savedTrack ?? this.savedTrack,
     );
   }
 }

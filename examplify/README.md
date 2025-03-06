@@ -75,7 +75,7 @@ If this is your first time using Flutter, make sure you can run the Flutter exam
 
   3. **Align your Java version**
 
-  If you need to make a change to your Java version (hint, Java SDK 17 is currently compatible with most Flutter projects):
+  If you need to make a change to your Java version (hint, [Java SDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) is currently compatible with most Flutter projects):
 
   - Download and install the required Java version (note the installation path as it is required in the next step)
   - Configure Flutter to use the required Java version

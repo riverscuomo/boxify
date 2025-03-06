@@ -11,6 +11,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:equatable/equatable.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 part 'player_event.dart';
 part 'my_player_state.dart';
@@ -39,6 +41,7 @@ part 'my_player_state.dart';
 class PlayerBloc extends Bloc<PlayerEvent, MyPlayerState> {
   final AudioPlayer _audioPlayer;
   StreamSubscription<PositionDiscontinuity>? _discontinuitySubscription;
+  final _firestore = FirebaseFirestore.instance;
 
   PlayerBloc({
     required AudioPlayer audioPlayer,
@@ -46,8 +49,6 @@ class PlayerBloc extends Bloc<PlayerEvent, MyPlayerState> {
         super(MyPlayerState.initial(
           player: audioPlayer,
         )) {
-    // logger.f('playerBloc: Player hashcode = ${audioPlayer.hashCode}');
-
     on<PlayerReset>(_onPlayerReset);
     on<StartPlayback>(_onStartPlayback);
     on<LoadPlayer>(_onLoadPlayer);
@@ -64,17 +65,34 @@ class PlayerBloc extends Bloc<PlayerEvent, MyPlayerState> {
         add(NotifyAutoAdvance());
       }
     });
+
+    // Listen for both state changes and play/pause events
+    _audioPlayer.playbackEventStream.listen((event) {
+      if (state.status == PlayerStatus.loaded) {
+        final needsSave = event.processingState == ProcessingState.completed || 
+                         event.processingState == ProcessingState.ready ||
+                         (_lastPlayingState != null && _lastPlayingState != _audioPlayer.playing);
+        
+        if (needsSave) {
+          _savePlaybackState(_audioPlayer.position);
+        }
+        
+        _lastPlayingState = _audioPlayer.playing;
+      }
+    });
   }
+
+  bool? _lastPlayingState;
 
   @override
   Future<void> close() {
     _discontinuitySubscription?.cancel();
     // Check if a track is already playing
     if (state.player.playing) {
-      state.player.stop(); // Stop the current track
+      _savePlaybackState(state.player.position);
+      state.player.stop();
     }
     _audioPlayer.dispose();
-
     return super.close();
   }
 
@@ -102,8 +120,6 @@ class PlayerBloc extends Bloc<PlayerEvent, MyPlayerState> {
     }
     state.player.play();
     emit(state.copyWith(player: state.player, status: PlayerStatus.loaded));
-
-    // logger.i('done play ${state.player.currentIndex}');
   }
 
   Future<void> _onNotifyAutoAdvance(
@@ -172,93 +188,33 @@ class PlayerBloc extends Bloc<PlayerEvent, MyPlayerState> {
     await state.player.play(); // Start playback
   }
 
-  // Future<void> _onStartPlayback(
-  //   StartPlayback event,
-  //   Emitter<MyPlayerState> emit,
-  // ) async {
-  //   logger.i('_onStartPlayback PlayerStatus.playPressed');
-  //   // logger.i(state.player.currentIndex);
-  //   emit(state.copyWith(status: PlayerStatus.playPressed));
-  //   // logger.i(state.player.currentIndex);
-
-  //   final trackIndexMapping = createTrackIndexMapping(event.tracks);
-  //   final audioSourceIndex = trackIndexMapping[event.index];
-
-  //   final availableTracksInEvent = event.tracks
-  //       .where((track) => track.available == true)
-  //       .toList(); // filtering out unavailable tracks
-
-  //   final queue = state.queue
-  //       .where((track) => track.available == true)
-  //       .toList(); // filtering out unavailable tracks
-
-  //   /// If the user has requested a new queue by either:
-  //   /// - clicking the [PlayButtonInCircle] for the first time to play a unqueued playlist
-  //   /// - tapping on an unqueued playlist track
-  //   if (!areTrackListsEqual(availableTracksInEvent, queue)) {
-  //     logger.i(
-  //         'user has requested a new queue (tracks != state.queue) so setting audiosource');
-
-  //     await _setAudioSource(availableTracksInEvent);
-  //   }
-
-  //   /// If you've clicked in a list at an index that is not the current index
-  //   if (audioSourceIndex != null &&
-  //       audioSourceIndex != state.player.currentIndex) {
-  //     logger.d(
-  //         'audioSourceIndex $audioSourceIndex != state.player.currentIndex ${state.player.currentIndex} so seeking to $audioSourceIndex');
-  //     add(SeekToIndex(index: audioSourceIndex));
-
-  //     emit(
-  //       state.copyWith(
-  //         status: PlayerStatus.playing,
-  //         player: state.player,
-  //         queue: availableTracksInEvent,
-  //       ),
-  //     );
-  //   }
-
-  //   state.player
-  //       .play(); // don't add the event Play() because that fire before Seek is done
-  //   logger.i('emitting PlayerStatus.playing');
-  //   emit(
-  //     state.copyWith(
-  //       status: PlayerStatus.playing,
-  //       queue: availableTracksInEvent,
-  //     ),
-  //   );
-  // }
-
   Future<void> _onLoadPlayer(
     LoadPlayer event,
     Emitter<MyPlayerState> emit,
   ) async {
     logger.i('_onLoadPlayer Player with new tracks.');
-
     emit(state.copyWith(status: PlayerStatus.loading));
 
     try {
-      final r = await _setAudioSource(event.tracks);
-
-      logger.i('done setting audio source so emitting PlayerStatus.loaded');
-
-      emit(
-        state.copyWith(
+      // Try to restore state first
+      await _restorePlaybackState();
+      
+      // If restoration didn't work (no state or empty queue), use provided tracks
+      if (state.queue.isEmpty) {
+        await _setAudioSource(event.tracks);
+        emit(state.copyWith(
+          queue: event.tracks,
           status: PlayerStatus.loaded,
           player: state.player,
-          queue: event.tracks,
-        ),
-      );
+        ));
+      }
+      
     } catch (err) {
-      logger.e('Error setting audio source: $err');
-      emit(
-        state.copyWith(
-          status: PlayerStatus.error,
-          // Consider defining an appropriate error message and passing it in the Failure
-          failure:
-              Failure(code: err.hashCode.toString(), message: err.toString()),
-        ),
-      );
+      logger.e('Error in _onLoadPlayer: $err');
+      emit(state.copyWith(
+        status: PlayerStatus.error,
+        failure: Failure(code: err.hashCode.toString(), message: err.toString()),
+      ));
     }
   }
 
@@ -388,5 +344,122 @@ class PlayerBloc extends Bloc<PlayerEvent, MyPlayerState> {
   ) async {
     logger.i('_onUpdateTrackBackgroundColor');
     emit(state.copyWith(backgroundColor: event.backgroundColor));
+  }
+
+  Future<void> _savePlaybackState(Duration position) async {
+    // Only save state if we have a valid queue and track - don't check playing state
+    if (state.queue.isEmpty || state.player.currentIndex == null) {
+      logger.d('Cannot save state: queueEmpty=${state.queue.isEmpty}, currentIndex=${state.player.currentIndex}');
+      return;
+    }
+
+    if (state.player.currentIndex! >= state.queue.length) {
+      logger.d('Cannot save state: invalid current index ${state.player.currentIndex}');
+      return;
+    }
+
+    final currentTrack = state.queue[state.player.currentIndex!];
+    if (currentTrack.uuid == null) {
+      logger.d('Cannot save state: track has no UUID');
+      return;
+    }
+
+    logger.d('Saving state for track: ${currentTrack.displayTitle} at position ${position.inSeconds}s');
+
+    // Save locally in bloc state
+    emit(state.copyWith(
+      savedPosition: position,
+      savedTrack: currentTrack,
+    ));
+
+    // Save to Firestore for cross-device sync
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        logger.d('Saving to Firestore for user ${user.uid}');
+        
+        // Save full queue data for proper restoration
+        final queueData = state.queue.map((track) => {
+          'uuid': track.uuid,
+          'title': track.displayTitle,
+          'link': track.link,
+          'downloadedUrl': track.downloadedUrl,
+          'imageUrl': track.imageUrl,
+          'album': track.album,
+          'available': track.available,
+        }).toList();
+
+        await _firestore.collection('playback_states').doc(user.uid).set({
+          'trackId': currentTrack.uuid,
+          'position': position.inMilliseconds,
+          'timestamp': FieldValue.serverTimestamp(),
+          'trackTitle': currentTrack.displayTitle,
+          'playing': state.player.playing,
+          'currentIndex': state.player.currentIndex,
+          'queue': queueData,
+        });
+        logger.d('Successfully saved state to Firestore');
+      }
+    } catch (e) {
+      logger.e('Error saving to Firestore: $e');
+    }
+  }
+
+  Future<void> _restorePlaybackState() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        logger.d('No user logged in, cannot restore state');
+        return;
+      }
+
+      final doc = await _firestore.collection('playback_states').doc(user.uid).get();
+      if (!doc.exists) {
+        logger.d('No saved state found in Firestore');
+        return;
+      }
+
+      final data = doc.data()!;
+      
+      // Restore queue first
+      if (data['queue'] != null) {
+        final queueData = List<Map<String, dynamic>>.from(data['queue'] as List);
+        final restoredTracks = queueData.map((trackData) => Track(
+          uuid: trackData['uuid'] as String,
+          displayTitle: trackData['title'] as String,
+          link: trackData['link'] as String?,
+          downloadedUrl: trackData['downloadedUrl'] as String?,
+          imageUrl: trackData['imageUrl'] as String?,
+          album: trackData['album'] as String?,
+          available: trackData['available'] as bool?,
+        )).toList();
+
+        if (restoredTracks.isEmpty) {
+          logger.d('Restored queue is empty');
+          return;
+        }
+
+        // Find the previously playing track
+        final trackId = data['trackId'] as String;
+        final position = Duration(milliseconds: data['position'] as int);
+        final trackIndex = restoredTracks.indexWhere((t) => t.uuid == trackId);
+        
+        if (trackIndex >= 0) {
+          logger.d('Restoring queue and seeking to saved track');
+          await _setAudioSource(restoredTracks);
+          await state.player.seek(position, index: trackIndex);
+          
+          emit(state.copyWith(
+            queue: restoredTracks,
+            savedPosition: position,
+            savedTrack: restoredTracks[trackIndex],
+          ));
+          
+          logger.d('State restored successfully');
+        }
+      }
+    } catch (e) {
+      logger.e('Error restoring playback state: $e');
+    }
   }
 }
