@@ -58,10 +58,9 @@ class _PlayerSmallTrackDetailScreenState<Track>
               children: [
                 // const SizedBox(height: 20),
                 SmallDetailTopListTile(
-                  playlist: playlistBloc.state.enquedPlaylist,
-                  track: track,
-                  source: 'PLAYLIST',
-                ),
+                    playlist: playlistBloc.state.enquedPlaylist,
+                    track: track,
+                    source: state.source),
                 const SizedBox(height: 10),
 
                 /// This is the actual up front image for the track

@@ -1,7 +1,9 @@
 import 'package:boxify/app_core.dart';
 import 'package:boxify/screens/playlist/widgets/track_touch_row_skeleton.dart';
+import 'package:boxify/services/bundles_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:collection/collection.dart';
 
 /// Returns a [ListView] of [TrackTouchRow]s. Used by [SmallSearchScreen] and [PlaylistTouchScreen].
 /// On the Small Search Screen, each [TrackTouchRow] should have an [overflowScreen].
@@ -21,6 +23,7 @@ class SmallTrackSearchResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final searchBloc = context.read<SearchBloc>();
     final playlistBloc = context.read<PlaylistBloc>();
+    final marketBloc = context.read<MarketBloc>(); // used to get bundle details
     final trackBloc = context.read<TrackBloc>();
     var indexWithinPlayableTracks = -1;
 
@@ -28,6 +31,7 @@ class SmallTrackSearchResults extends StatelessWidget {
       if (track.available == true) {
         indexWithinPlayableTracks++;
       }
+
       return TrackTouchRow(
         i: i,
         indexWithinPlayableTracks: indexWithinPlayableTracks,
@@ -90,6 +94,7 @@ class SmallTrackSearchResults extends StatelessWidget {
     final canPlay = context.read<PlayerService>().handlePlay(
           index: i,
           tracks: searchBloc.state.searchResultsTracks,
+          source: 'SEARCH',
         );
     if (!canPlay) {
       showTrackSnack(context, track.bundleName ?? '?');

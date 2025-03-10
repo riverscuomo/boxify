@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:boxify/app_core.dart';
+import 'package:boxify/services/bundles_manager.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -63,6 +64,9 @@ class MarketBloc extends Bloc<MarketEvent, MarketState> {
 
       counts = _userHelper.calculateCounts(event.user, allBundles);
     }
+
+    // Initialize the bundles manager
+    BundleManager().updateBundles(allBundles);
 
     final unpurchasedBundles = allBundles
         .where((bundle) => !event.user.bundleIds.contains(bundle.id))

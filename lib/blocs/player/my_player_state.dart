@@ -21,12 +21,17 @@ class MyPlayerState extends Equatable {
   final HSLColor backgroundColor;
   List<Track> queue;
 
+  /// Source of the current track being played (where is the track playing from?)
+  /// Examples: PLAYLIST, SEARCH or BUNDLE
+  final String source;
+
   MyPlayerState({
     required this.status,
     required this.failure,
     required this.player,
     required this.backgroundColor,
     required this.queue,
+    required this.source,
   });
 
   factory MyPlayerState.initial(
@@ -38,6 +43,7 @@ class MyPlayerState extends Equatable {
       player: player,
       backgroundColor: HSLColor.fromColor(Core.appColor.primary),
       queue: [],
+      source: 'INITIAL',
     );
   }
 
@@ -48,6 +54,7 @@ class MyPlayerState extends Equatable {
         player,
         backgroundColor,
         queue,
+        source,
       ];
 
   MyPlayerState copyWith({
@@ -57,6 +64,7 @@ class MyPlayerState extends Equatable {
     ConcatenatingAudioSource? audioSource,
     HSLColor? backgroundColor,
     List<Track>? queue,
+    String? source,
   }) {
     return MyPlayerState(
       status: status ?? this.status,
@@ -64,6 +72,7 @@ class MyPlayerState extends Equatable {
       player: player ?? this.player,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       queue: queue ?? this.queue,
+      source: source ?? this.source,
     );
   }
 }

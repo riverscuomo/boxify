@@ -266,7 +266,7 @@ class LogOutButton extends StatelessWidget {
 
         // Reset player state before logging out
         context.read<PlayerBloc>().add(PlayerReset());
-        
+
         context.read<AuthBloc>().add(AuthLogoutRequested());
 
         GoRouter.of(context).go(
@@ -544,6 +544,7 @@ class MyPlayButton extends StatelessWidget {
                 tracks: context.read<TrackBloc>().state.displayedTracks,
                 playlist: context.read<PlaylistBloc>().state.viewedPlaylist,
                 index: index,
+                source: 'PLAYLIST',
               );
         },
         child: Icon(
@@ -599,9 +600,10 @@ class PlayButton extends StatelessWidget {
               iconSize: size,
               onPressed: () {
                 context.read<PlayerService>().handlePlay(
-                    // tracks: context.read<TrackBloc>().state.displayedTracks,
-                    // playlist:
-                    //     context.read<PlaylistBloc>().state.viewedPlaylist,
+                      // tracks: context.read<TrackBloc>().state.displayedTracks,
+                      // playlist:
+                      //     context.read<PlaylistBloc>().state.viewedPlaylist,
+                      source: 'PLAYLIST',
                     );
               });
         } else if (processingState != ProcessingState.completed) {
@@ -769,6 +771,7 @@ class _PlayButtonInCircleState extends State<PlayButtonInCircle> {
     final canPlay = context.read<PlayerService>().handlePlay(
           tracks: tracks,
           playlist: widget.playlist,
+          source: 'PLAYLIST',
         );
 
     if (!canPlay && Core.app.type == AppType.advanced) {

@@ -55,10 +55,12 @@ class PlayerService {
   /// - `selectTrack` ([bool]): whether the track should be selected
   /// - `updateQueue` ([bool]): whether the player should be reinitialized
   /// - `index` ([int]): the index of the track to be played
+  /// - `source` ([String]): the source of the track (where it's being played from - e.g. 'PLAYLIST', 'SEARCH', etc.)
   bool handlePlay({
     List<Track>? tracks,
     Playlist? playlist,
     int? index,
+    required String source,
   }) {
     /// If you're simply toggling the play button for the current track
     if (tracks == null) {
@@ -91,14 +93,20 @@ class PlayerService {
         }
       }
 
-      /// If this function was called with as a request to play a specific playlist,
-      if (playlist != null) {
-        _playlistBloc.add(SetEnqueuedPlaylist(playlist: playlist));
+      // Enqueue playlist if it's not already enqueued
+      // Note: playlist can be null (e.g. when playing from search results), will reset the queue
+      if (_playlistBloc.state.enquedPlaylist != playlist) {
+        if (playlist == null) {
+          _playlistBloc.add(ResetEnqueuedPlaylist());
+        } else {
+          _playlistBloc.add(SetEnqueuedPlaylist(playlist: playlist));
+        }
       }
 
       _playerBloc.add(StartPlayback(
         tracks: tracks,
         index: index,
+        source: source,
       ));
 
       return true;

@@ -35,6 +35,10 @@ class SetEnqueuedPlaylist extends PlaylistEvent {
   List<Object?> get props => [playlist];
 }
 
+class ResetEnqueuedPlaylist extends PlaylistEvent {
+  const ResetEnqueuedPlaylist();
+}
+
 class LoadNewReleasesPlaylist extends PlaylistEvent {
   final bool clearPlaylistsCache;
 

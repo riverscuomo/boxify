@@ -39,6 +39,7 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
     on<InitialPlaylistState>(_onInitialState);
     on<SetEditingPlaylist>(_onSetEditingPlaylist);
     on<SetEnqueuedPlaylist>(_onSetEnqueuedPlaylist);
+    on<ResetEnqueuedPlaylist>(_onResetEnqueuedPlaylist);
     on<LoadFollowedPlaylists>(_onLoadFollowedPlaylists);
     on<Load4And5StarPlaylists>(_onLoad4And5StarPlaylists);
     on<LoadAllSongsPlaylist>(_onLoadAllSongsPlaylist);
@@ -115,6 +116,18 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
         ),
       );
     }
+  }
+
+  /// Reset the enqueued playlist to null
+  Future<void> _onResetEnqueuedPlaylist(
+    ResetEnqueuedPlaylist event,
+    Emitter<PlaylistState> emit,
+  ) async {
+    // enqueued playlist value can't be reset with copyWith, since
+    // providing a null value will not change the value of the state
+    final newState = state.copyWith(); // so we create a new state..
+    newState.enquedPlaylist = null; // ..and set the value to null manually
+    emit(newState);
   }
 
   /// Loads all the playlists asynchronously.

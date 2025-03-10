@@ -124,9 +124,10 @@ void showTrackOverflowMenu(
     required Track track,
     Playlist? playlist,
     int? index}) {
-  String? imageFilename = track.imageFilename;
-  if (playlist != null) {
-    imageFilename = assignPlaylistImageFilenameToTrack(track, playlist);
+  String? imageUrl = assignPlaylistImageUrlToTrack(track, playlist);
+  String? imageFilename = assignPlaylistImageFilenameToTrack(track, playlist);
+  if (imageUrl == null && imageFilename == null) {
+    imageFilename = Core.app.placeHolderImageFilename;
   }
   showModalBottomSheet(
     context: context,
@@ -135,7 +136,7 @@ void showTrackOverflowMenu(
         mainAxisSize: MainAxisSize.min,
         children: [
           imageOrIcon(
-              imageUrl: track.imageUrl,
+              imageUrl: imageUrl,
               filename: imageFilename,
               height: 120,
               width: 120),

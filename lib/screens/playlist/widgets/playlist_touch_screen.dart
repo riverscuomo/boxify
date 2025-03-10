@@ -115,6 +115,7 @@ class _PlaylistTouchScreenState extends State<PlaylistTouchScreen> {
                                                 tracks: state.displayedTracks,
                                                 index: index,
                                                 playlist: playlist,
+                                                source: 'PLAYLIST',
                                               );
                                           if (!canPlay) {
                                             showTrackSnack(

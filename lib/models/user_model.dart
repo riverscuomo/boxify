@@ -25,9 +25,10 @@ class User extends Equatable {
   final List<String> playlistIds;
   final List<dynamic> badges;
   final List<dynamic> purchases;
+
   /// The roles array determines what tracks a user can access in the basic app type.
   /// (Note: Roles are not used in the advanced app type)
-  /// 
+  ///
   /// Role-based access is implemented entirely through Firestore:
   /// 1. Users have a roles array in their Firestore document
   /// 2. Tracks have a role field in their Firestore document

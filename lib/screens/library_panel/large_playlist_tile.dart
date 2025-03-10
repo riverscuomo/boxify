@@ -110,6 +110,7 @@ class LargePlaylistTile extends StatelessWidget {
         context.read<PlayerService>().handlePlay(
               tracks: tracks,
               playlist: playlist,
+              source: 'PLAYLIST',
             );
       },
       child: Container(
